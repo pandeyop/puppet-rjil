@@ -16,9 +16,9 @@ class rjil::tempest (
   $tempest_test_file      = '/home/jenkins/tempest_tests.txt',
 ) {
 
-##
-# Create required resources in order to run tempest
-##
+  ##
+  # Create required resources in order to run tempest
+  ##
 
   file {'/etc/keystone':
     ensure => directory,
@@ -81,6 +81,20 @@ class rjil::tempest (
     'keystone_authtoken/admin_tenant_name': value => $service_tenant;
     'keystone_authtoken/admin_user':        value => $glance_admin_user;
     'keystone_authtoken/admin_password':    value => $glance_admin_password;
+  }
+
+  ##
+  # Generate ssh key to enable running ssh tests in tempest
+  ##  
+  ssh_key_tempest{'jenkins':
+    user => 'jenkins',
+    type => 'ssh-rsa',
+  }
+
+  exec { "generate_tempest_ssh_key":
+    command => 'ssh-keygen -b 4096 -t rsa -f /home/jenkins/.ssh/id_rsa -q -N ""',
+    creates => '/home/jenkins/.ssh/id_rsa',
+    require => user,
   }
 
   ##
